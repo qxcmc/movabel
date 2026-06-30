@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+app/dist/
+tauri/src-tauri/target/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+backend/dist/
+backend/build/
+*.spec
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build logs (CI testing)
+build_*.txt
+
+# Bun lock (we use pnpm)
+bun.lock
+
+# Misc
+*.tmp
+*.temp

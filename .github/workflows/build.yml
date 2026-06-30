@@ -1,0 +1,82 @@
+name: Build Movabel
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Windows Installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build MCP shim binary
+        run: |
+          pip install pyinstaller httpx anyio
+          cd backend
+          pyinstaller movabel-mcp.spec
+          New-Item -ItemType Directory -Force -Path "..\tauri\src-tauri\binaries"
+          Copy-Item "dist\movabel-mcp.exe" -Destination "..\tauri\src-tauri\binaries\"
+
+      - name: Create src-tauri symlink
+        run: |
+          cd app
+          cmd /c "mklink /D src-tauri ..\tauri\src-tauri"
+
+      - name: Install frontend deps
+        run: |
+          cd app
+          pnpm install --frozen-lockfile
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Tauri Build
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app/src-tauri
+          tauriScript: pnpm
+          args: --target x86_64-pc-windows-msvc
+
+      - name: Upload MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: Movabel-Windows-MSI
+          path: app/src-tauri/target/release/bundle/msi/*.msi
+          if-no-files-found: warn
+
+      - name: Upload NSIS
+        uses: actions/upload-artifact@v4
+        with:
+          name: Movabel-Windows-NSIS
+          path: app/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: warn
