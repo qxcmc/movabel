@@ -39,6 +39,47 @@ jobs:
         run: |
           pip install pyinstaller httpx anyio
           cd backend
+          python -c "
+          spec = '''# -*- mode: python ; coding: utf-8 -*-
+          a = Analysis(
+              ['mcp_shim\\\\__main__.py'],
+              pathex=[],
+              binaries=[],
+              datas=[],
+              hiddenimports=['backend.mcp_shim', 'backend.mcp_shim.__main__', 'httpx', 'httpx._transports.default', 'anyio'],
+              hookspath=[],
+              hooksconfig={},
+              runtime_hooks=[],
+              excludes=['torch', 'transformers', 'mlx', 'mlx_audio', 'mlx_lm', 'qwen_tts', 'chatterbox', 'zipvoice', 'tada', 'kokoro', 'misaki', 'spacy', 'librosa', 'numba', 'numpy', 'pedalboard', 'fastapi', 'uvicorn', 'sqlalchemy', 'fastmcp', 'mcp'],
+              noarchive=False,
+              optimize=0,
+          )
+          pyz = PYZ(a.pure)
+          exe = EXE(
+              pyz,
+              a.scripts,
+              a.binaries,
+              a.datas,
+              [],
+              name='movabel-mcp',
+              debug=False,
+              bootloader_ignore_signals=False,
+              strip=False,
+              upx=True,
+              upx_exclude=[],
+              runtime_tmpdir=None,
+              console=True,
+              disable_windowed_traceback=False,
+              argv_emulation=False,
+              target_arch=None,
+              codesign_identity=None,
+              entitlements_file=None,
+          )
+          '''
+          with open('movabel-mcp.spec', 'w') as f:
+              f.write(spec)
+          print('spec file created')
+          "
           pyinstaller movabel-mcp.spec
           New-Item -ItemType Directory -Force -Path "..\tauri\src-tauri\binaries"
           Copy-Item "dist\movabel-mcp.exe" -Destination "..\tauri\src-tauri\binaries\"
