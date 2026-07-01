@@ -81,8 +81,8 @@ jobs:
           print('spec file created')
           "
           pyinstaller movabel-mcp.spec
-          New-Item -ItemType Directory -Force -Path "..\tauri\src-tauri\binaries"
-          Copy-Item "dist\movabel-mcp.exe" -Destination "..\tauri\src-tauri\binaries\"
+          New-Item -ItemType Directory -Force -Path "..\tauri\src-tauri\binaries" -ErrorAction SilentlyContinue
+          Copy-Item -Force "dist\movabel-mcp.exe" -Destination "..\tauri\src-tauri\binaries\"
 
       - name: Create src-tauri symlink
         run: |
