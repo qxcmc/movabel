@@ -87,6 +87,7 @@ jobs:
       - name: Create src-tauri symlink
         run: |
           cd app
+          if (Test-Path src-tauri) { Remove-Item -Force src-tauri }
           cmd /c "mklink /D src-tauri ..\tauri\src-tauri"
 
       - name: Install frontend deps
